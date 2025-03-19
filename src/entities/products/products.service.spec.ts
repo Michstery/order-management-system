@@ -5,6 +5,7 @@ import { Product } from './schemas/product.schema';
 import { Model } from 'mongoose';
 import { CreateProductDto } from './dto/create-product.dto';
 import { NotFoundException } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 
 describe('ProductsService', () => {
   let service: ProductsService;
@@ -19,6 +20,12 @@ describe('ProductsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        CacheModule.register({
+          ttl: 60,
+          max: 100,
+        }),
+      ],
       providers: [
         ProductsService,
         {

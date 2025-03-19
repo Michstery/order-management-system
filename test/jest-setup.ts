@@ -6,7 +6,13 @@ import configuration from '../src/config/configuration';
 let mongod: MongoMemoryServer;
 
 beforeAll(async () => {
-  mongod = await MongoMemoryServer.create();
+  mongod = await MongoMemoryServer.create({
+    instance: {
+      dbName: 'test',
+      port: 27017,
+      storageEngine: 'wiredTiger',
+    },
+  });
   const uri = await mongod.getUri();
   process.env.MONGODB_URI = uri;
 
@@ -27,10 +33,8 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.disconnect();
-  }
   if (mongod) {
     await mongod.stop();
   }
+  await mongoose.disconnect();
 }); 

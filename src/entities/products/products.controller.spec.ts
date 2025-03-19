@@ -6,6 +6,7 @@ import { ProductsModule } from './products.module';
 import { ProductsService } from './products.service';
 import { Product, ProductSchema } from './schemas/product.schema';
 import { ConfigModule } from '@nestjs/config';
+import { CacheModule } from '@nestjs/cache-manager';
 import configuration from '../../config/configuration';
 
 describe('ProductsController (integration)', () => {
@@ -19,6 +20,11 @@ describe('ProductsController (integration)', () => {
           load: [configuration],
         }),
         MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost/test'),
+        CacheModule.register({
+          ttl: 60,
+          max: 100,
+          isGlobal: true,
+        }),
         ProductsModule,
       ],
     }).compile();

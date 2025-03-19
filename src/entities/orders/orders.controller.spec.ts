@@ -4,8 +4,11 @@ import * as request from 'supertest';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OrdersModule } from './orders.module';
 import { OrdersService } from './orders.service';
-import { Order, OrderSchema } from './schemas/order.schema';
 import { ConfigModule } from '@nestjs/config';
+import { CacheModule } from '@nestjs/cache-manager';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import configuration from '../../config/configuration';
 import { UsersModule } from '../users/users.module';
 import { ProductsModule } from '../products/products.module';
@@ -21,9 +24,26 @@ describe('OrdersController (integration)', () => {
           load: [configuration],
         }),
         MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost/test'),
+        CacheModule.register({
+          ttl: 60,
+          max: 100,
+          isGlobal: true,
+        }),
+        ThrottlerModule.forRoot({
+          throttlers: [{
+            ttl: 60,
+            limit: 10,
+          }],
+        }),
         OrdersModule,
         UsersModule,
         ProductsModule,
+      ],
+      providers: [
+        {
+          provide: APP_GUARD,
+          useClass: ThrottlerGuard,
+        },
       ],
     }).compile();
 
