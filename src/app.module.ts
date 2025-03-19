@@ -9,6 +9,7 @@ import { OrdersModule } from './entities/orders/orders.module';
 import configuration from './config/configuration';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import * as redisStore from 'cache-manager-redis-store';
 
 @Module({
   imports: [
@@ -24,9 +25,12 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     }),
     // Register CacheModule globally
     CacheModule.register({
-      ttl: 60, // Time-to-live in seconds (e.g., 60 seconds)
-      max: 100, // Maximum number of items in cache
-      isGlobal: true, // Make cache available across all modules
+      store: redisStore,
+      host: 'localhost', // Redis host
+      port: 6379,        // Redis port
+      ttl: 60,           // seconds
+      max: 100,          // max items
+      isGlobal: true,
     }),
     // Register ThrottlerModule globally
     ThrottlerModule.forRoot({
